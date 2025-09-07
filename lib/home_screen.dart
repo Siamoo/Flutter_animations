@@ -7,80 +7,100 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  double _begin = 100;
-  double _end = 200;
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  late Animation<AlignmentGeometry> _greenAnimation;
+  late Animation<AlignmentGeometry> _redAnimation;
+  late AnimationController _animationController;
 
-    late final Widget _child; // 👈 keep a reference
-  @override
   @override
   void initState() {
     super.initState();
-    _child = _getColumnWidget();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+      reverseDuration: Duration(seconds: 1),
+    );
+    _greenAnimation =
+        Tween<AlignmentGeometry>(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+            reverseCurve: Curves.easeInOut,
+          ),
+        );
+    _redAnimation =
+        Tween<AlignmentGeometry>(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInBack,
+            // reverseCurve: Curves.easeOutBack,
+          ),
+        );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Tween Animations")),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(height: 30),
-            _containerWidget(),
-            Spacer(),
-            _buttonWidget(),
-            SizedBox(height: 30),
-          ],
-        ),
+      appBar: AppBar(title: Text("Foo Transition")),
+      body: Column(children: [_stackWidget(), _controlButton()]),
+    );
+  }
+
+  Widget _stackWidget() {
+    return Expanded(
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          AlignTransition(
+            alignment: _greenAnimation,
+            child: CircleAvatar(backgroundColor: Colors.green),
+          ),
+          AlignTransition(
+            alignment: _redAnimation,
+            child: CircleAvatar(backgroundColor: Colors.red),
+          ),
+        ],
       ),
     );
   }
 
-  ElevatedButton _buttonWidget() {
-    return ElevatedButton(
-      onPressed: () {
-        setState(() {
-          _begin = (_begin == 100) ? 200 : 100;
-          _end = (_end == 100) ? 200 : 100;
-        });
-      },
-      child: const Text("Animate"),
+  Widget _controlButton() {
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      children: [
+        ElevatedButton(
+          onPressed: () => _animationController.forward(),
+          child: Text("Forward"),
+        ),
+        ElevatedButton(
+          onPressed: () => _animationController.reverse(),
+          child: Text("Reverse"),
+        ),
+        ElevatedButton(
+          onPressed: () => _animationController.stop(),
+          child: Text("Stop"),
+        ),
+        ElevatedButton(
+          onPressed: () => _animationController.reset(),
+          child: Text("Reset"),
+        ),
+        ElevatedButton(
+          onPressed: () => _animationController.repeat(),
+          child: Text("Repeat (reverse=false)"),
+        ),
+        SizedBox(width: 5),
+        ElevatedButton(
+          onPressed: () => _animationController.repeat(reverse: true),
+          child: Text("Repeat (reverse=true)"),
+        ),
+      ],
     );
   }
-
-Widget _containerWidget() {
-  return TweenAnimationBuilder(
-    curve: Curves.bounceInOut,
-    tween: Tween<double>(begin: _begin, end: _end),
-    duration: Duration(seconds: 2),
-    child: _child,   
-    builder: (context, value, child) {
-      return Container(
-        height: value,
-        width: value,
-        decoration: _getBoxDecoration(),
-        child: child,   // we use the child from the builder to not rebuild it every time
-      );
-    },
-  );
-}
-
-}
-
-Widget _getColumnWidget() {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: const [
-      Text("Flutter", style: TextStyle(color: Colors.white, fontSize: 20)),
-      Text("Animation", style: TextStyle(color: Colors.white, fontSize: 20)),
-    ],
-  );
-}
-
-_getBoxDecoration() {
-  return BoxDecoration(
-    color: Colors.blueAccent,
-    borderRadius: BorderRadius.circular(10),
-  );
 }
