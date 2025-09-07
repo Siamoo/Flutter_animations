@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animations/counter_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,14 +16,8 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(title: const Text("Animated Foo Basics")),
       body: Center(
         child: Column(
-          children: [
-            SizedBox(height: 30),
-            _containerWidget(),
-            Spacer(),
-            SizedBox(height: 30),
-            _buttonWidget(),
-            SizedBox(height: 30),
-          ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [_buttonWidget()],
         ),
       ),
     );
@@ -31,28 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   ElevatedButton _buttonWidget() {
     return ElevatedButton(
       onPressed: () {
-        setState(() {
-          _dimension = _dimension == 100 ? 200 : 100;
-        });
+        Navigator.push(context, MaterialPageRoute(builder: (context) => CounterScreen()));
       },
       child: const Text("Animate"),
-    );
-  }
-
-  Widget _containerWidget() {
-    return AnimatedContainer(
-      height: _dimension,
-      width: _dimension,
-      curve: Curves.bounceOut,
-      decoration: _getBoxDecoration(),
-      duration: const Duration(seconds: 2),
-    );
-  }
-
-  BoxDecoration _getBoxDecoration() {
-    return BoxDecoration(
-      color: Colors.blueAccent,
-      borderRadius: BorderRadius.circular(20),
     );
   }
 }
