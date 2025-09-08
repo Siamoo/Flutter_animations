@@ -17,12 +17,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    // AnimationStatus types
-    AnimationStatus.completed;
-    AnimationStatus.dismissed;
-    AnimationStatus.forward;
-    AnimationStatus.reverse;
-
     _greenController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
@@ -55,14 +49,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             // reverseCurve: Curves.easeOutBack,
           ),
         );
-
-    _greenController.addStatusListener((status) {
-      if (_greenController.status == AnimationStatus.completed &&
-          _redController.status == AnimationStatus.dismissed) {
+        
+    _greenController.addListener(() {
+      if (_greenController.value >= 0.5 && _redController.value== 0 ) {
         _redController.forward();
       }
-      if (_greenController.status == AnimationStatus.dismissed &&
-          _redController.status == AnimationStatus.completed) {
+      if (_greenController.value <= 0.5 && _redController.value == 1) {
         _redController.reverse();
       }
     });
