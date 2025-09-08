@@ -7,19 +7,31 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<AlignmentGeometry> _greenAnimation;
   late Animation<AlignmentGeometry> _redAnimation;
-  late AnimationController _animationController;
+  late AnimationController _greenController;
+  late AnimationController _redController;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
+
+    // AnimationStatus types
+    AnimationStatus.completed;
+    AnimationStatus.dismissed;
+    AnimationStatus.forward;
+    AnimationStatus.reverse;
+
+    _greenController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
       reverseDuration: Duration(seconds: 1),
+    );
+    _redController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+      reverseDuration: Duration(seconds: 2),
     );
     _greenAnimation =
         Tween<AlignmentGeometry>(
@@ -27,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen>
           end: Alignment.bottomCenter,
         ).animate(
           CurvedAnimation(
-            parent: _animationController,
+            parent: _greenController,
             curve: Curves.easeInOut,
             reverseCurve: Curves.easeInOut,
           ),
@@ -38,11 +50,22 @@ class _HomeScreenState extends State<HomeScreen>
           end: Alignment.centerRight,
         ).animate(
           CurvedAnimation(
-            parent: _animationController,
+            parent: _redController,
             curve: Curves.easeInBack,
             // reverseCurve: Curves.easeOutBack,
           ),
         );
+
+    _greenController.addStatusListener((status) {
+      if (_greenController.status == AnimationStatus.completed &&
+          _redController.status == AnimationStatus.dismissed) {
+        _redController.forward();
+      }
+      if (_greenController.status == AnimationStatus.dismissed &&
+          _redController.status == AnimationStatus.completed) {
+        _redController.reverse();
+      }
+    });
   }
 
   @override
@@ -76,29 +99,18 @@ class _HomeScreenState extends State<HomeScreen>
       alignment: WrapAlignment.spaceBetween,
       children: [
         ElevatedButton(
-          onPressed: () => _animationController.forward(),
+          onPressed: () {
+            _greenController.forward();
+          },
+
           child: Text("Forward"),
         ),
+        SizedBox(width: 30),
         ElevatedButton(
-          onPressed: () => _animationController.reverse(),
+          onPressed: () {
+            _greenController.reverse();
+          },
           child: Text("Reverse"),
-        ),
-        ElevatedButton(
-          onPressed: () => _animationController.stop(),
-          child: Text("Stop"),
-        ),
-        ElevatedButton(
-          onPressed: () => _animationController.reset(),
-          child: Text("Reset"),
-        ),
-        ElevatedButton(
-          onPressed: () => _animationController.repeat(),
-          child: Text("Repeat (reverse=false)"),
-        ),
-        SizedBox(width: 5),
-        ElevatedButton(
-          onPressed: () => _animationController.repeat(reverse: true),
-          child: Text("Repeat (reverse=true)"),
         ),
       ],
     );
